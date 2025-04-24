@@ -1,0 +1,77 @@
+[
+  {
+    "id": "tokyo-1",
+    "name": "Park Hotel Tokyo",
+    "type": "hotel",
+    "category": "Hotel Boutique",
+    "address": "Minato-ku, Tokyo, Japão",
+    "latitude": 35.6655,
+    "longitude": 139.759,
+    "rating": 4.6,
+    "reviewCount": 892,
+    "tags": [
+      "romântico",
+      "moderno",
+      "vista"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1531068916221-a380a3e2d115?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "reviews": [
+      {
+        "author": "Ana Paula",
+        "date": "2024-09-15",
+        "rating": 5,
+        "text": "Vista incrível da Tokyo Tower. Quarto super confortável e staff atencioso!"
+      }
+    ]
+  },
+  {
+    "id": "tokyo-2",
+    "name": "Sushi Saito",
+    "type": "restaurant",
+    "category": "Comida Japonesa",
+    "address": "Chiyoda-ku, Tokyo, Japão",
+    "latitude": 35.6735,
+    "longitude": 139.743,
+    "rating": 4.9,
+    "reviewCount": 1032,
+    "tags": [
+      "gastronômico",
+      "luxo",
+      "omakase"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1639124215495-cc6e181971de?q=80&w=2674&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "reviews": [
+      {
+        "author": "Carlos M.",
+        "date": "2024-11-03",
+        "rating": 5,
+        "text": "A experiência omakase mais refinada da minha vida. Atendimento de outro mundo."
+      }
+    ]
+  },
+  {
+    "id": "tokyo-3",
+    "name": "Shinjuku Gyoen National Garden",
+    "type": "attraction",
+    "category": "Parque e Jardim",
+    "address": "Shinjuku, Tokyo, Japão",
+    "latitude": 35.6852,
+    "longitude": 139.7101,
+    "rating": 4.7,
+    "reviewCount": 2394,
+    "tags": [
+      "natureza",
+      "relaxante",
+      "cerejeiras"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1614202619365-d26574871a2a?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "reviews": [
+      {
+        "author": "Juliana R.",
+        "date": "2025-03-28",
+        "rating": 4,
+        "text": "Perfeito para relaxar e ver as cerejeiras na primavera. Muito bem cuidado!"
+      }
+    ]
+  }
+]
