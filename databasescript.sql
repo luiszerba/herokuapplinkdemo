@@ -23,4 +23,8 @@ CREATE TABLE destinos (
 );
 
 ALTER TABLE restaurantes ADD COLUMN continente TEXT;
+ALTER TABLE restaurantes ADD COLUMN pais TEXT;
 
+UPDATE restaurantes
+SET pais = (avaliacao_json->'parentGeoName')::text
+WHERE pais IS NULL;

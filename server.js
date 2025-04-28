@@ -1,4 +1,3 @@
-// server.js
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -19,42 +18,71 @@ await client.connect();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Rota para buscar todos os paises únicos
+// Nova rota para buscar países disponíveis
 app.get('/api/paises', async (req, res) => {
   try {
-    const result = await client.query(`SELECT DISTINCT pais FROM restaurantes ORDER BY pais`);
-    const paises = result.rows.map(row => row.pais);
-    res.json(paises);
+    const result = await client.query(
+      `SELECT DISTINCT pais FROM restaurantes WHERE pais IS NOT NULL ORDER BY pais`
+    );
+    res.json(result.rows.map(r => r.pais));
   } catch (err) {
     console.error('Erro na consulta de países:', err);
     res.status(500).json({ error: 'Erro ao consultar países' });
   }
 });
 
-// Rota para buscar restaurantes filtrados
-app.get('/api/restaurantes', async (req, res) => {
-  const { pais, notaMinima = 0, categoria = '', pagina = 1 } = req.query;
-  const limite = 30;
-  const offset = (pagina - 1) * limite;
+// Nova rota para buscar regiões (parent_geo_name)
+app.get('/api/regioes', async (req, res) => {
+  const { pais } = req.query;
 
   try {
-    const values = [pais, notaMinima, `%${categoria}%`, limite, offset];
     const result = await client.query(
-      `SELECT * FROM restaurantes
-       WHERE pais = $1 AND nota >= $2 AND categoria ILIKE $3
-       ORDER BY nota DESC
-       LIMIT $4 OFFSET $5`,
-      values
+      `SELECT DISTINCT parent_geo_name FROM restaurantes
+       WHERE pais = $1 AND parent_geo_name IS NOT NULL
+       ORDER BY parent_geo_name`,
+      [pais]
     );
+    res.json(result.rows.map(r => r.parent_geo_name));
+  } catch (err) {
+    console.error('Erro na consulta de regiões:', err);
+    res.status(500).json({ error: 'Erro ao consultar regiões' });
+  }
+});
+
+// Rota para buscar restaurantes filtrados
+app.get('/api/restaurantes', async (req, res) => {
+  const { pais, regiao, notaMinima = 0, categoria = '', pagina = 1 } = req.query;
+
+  const limit = 30;
+  const offset = (pagina - 1) * limit;
+
+  let query = `SELECT * FROM restaurantes WHERE pais = $1 AND nota >= $2`;
+  let params = [pais, notaMinima];
+
+  if (regiao) {
+    params.push(regiao);
+    query += ` AND parent_geo_name = $${params.length}`;
+  }
+
+  if (categoria) {
+    params.push(categoria);
+    query += ` AND categoria = $${params.length}`;
+  }
+
+  query += ` ORDER BY nota DESC NULLS LAST OFFSET $${params.length + 1} LIMIT ${limit}`;
+  params.push(offset);
+
+  try {
+    const result = await client.query(query, params);
     res.json(result.rows);
   } catch (err) {
-    console.error('Erro na consulta de restaurantes:', err);
+    console.error('Erro na consulta:', err);
     res.status(500).json({ error: 'Erro ao consultar restaurantes' });
   }
 });
 
-// Servir frontend do Vite
 app.use(express.static(path.join(__dirname, 'dist')));
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });

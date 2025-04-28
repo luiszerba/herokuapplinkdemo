@@ -4,6 +4,8 @@ function App() {
   const [restaurantes, setRestaurantes] = useState([]);
   const [paisesDisponiveis, setPaisesDisponiveis] = useState([]);
   const [paisSelecionado, setPaisSelecionado] = useState('');
+  const [regioesDisponiveis, setRegioesDisponiveis] = useState([]);
+  const [regiaoSelecionada, setRegiaoSelecionada] = useState('');
   const [notaMinima, setNotaMinima] = useState(0);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
   const [paginaAtual, setPaginaAtual] = useState(1);
@@ -19,18 +21,32 @@ function App() {
 
   useEffect(() => {
     if (paisSelecionado) {
+      fetchRegioes();
       fetchRestaurantes();
     }
-  }, [paisSelecionado, notaMinima, categoriaSelecionada, paginaAtual]);
+  }, [paisSelecionado, notaMinima, categoriaSelecionada, paginaAtual, regiaoSelecionada]);
 
   const fetchPaises = async () => {
     try {
       const response = await fetch('/api/paises');
       const data = await response.json();
       setPaisesDisponiveis(data);
-      setPaisSelecionado(data[0] || '');
+      if (data.length > 0) {
+        setPaisSelecionado(data[0]);
+      }
     } catch (error) {
       console.error('Erro ao buscar países:', error);
+    }
+  };
+
+  const fetchRegioes = async () => {
+    try {
+      const response = await fetch(`/api/regioes?pais=${paisSelecionado}`);
+      const data = await response.json();
+      setRegioesDisponiveis(data);
+      setRegiaoSelecionada('');
+    } catch (error) {
+      console.error('Erro ao buscar regiões:', error);
     }
   };
 
@@ -38,7 +54,7 @@ function App() {
     try {
       setCarregando(true);
       setErro(false);
-      const response = await fetch(`/api/restaurantes?pais=${paisSelecionado}&notaMinima=${notaMinima}&categoria=${categoriaSelecionada}&pagina=${paginaAtual}`);
+      const response = await fetch(`/api/restaurantes?pais=${paisSelecionado}&regiao=${regiaoSelecionada}&notaMinima=${notaMinima}&categoria=${categoriaSelecionada}&pagina=${paginaAtual}`);
       const data = await response.json();
       setRestaurantes(data);
       const novasCategorias = new Set(categoriasDisponiveis);
@@ -89,6 +105,20 @@ function App() {
 
         <select
           className="border p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={regiaoSelecionada}
+          onChange={(e) => {
+            setRegiaoSelecionada(e.target.value);
+            setPaginaAtual(1);
+          }}
+        >
+          <option value="">Todas as regiões</option>
+          {regioesDisponiveis.map((regiao) => (
+            <option key={regiao} value={regiao}>{regiao}</option>
+          ))}
+        </select>
+
+        <select
+          className="border p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={notaMinima}
           onChange={(e) => {
             setNotaMinima(e.target.value);
@@ -134,8 +164,8 @@ function App() {
               />
               <div className="p-4">
                 <h2 className="text-xl font-semibold truncate mb-1" title={restaurante.nome}>{restaurante.nome}</h2>
-                <p className="text-gray-500 text-xs mb-1 capitalize">{restaurante.avaliacao_json?.parentGeoName}</p>
                 <p className="text-gray-600 text-sm mb-1 capitalize">{restaurante.categoria}</p>
+                <p className="text-gray-500 text-xs mb-1">{restaurante.parent_geo_name}</p>
                 <p className={`${corNota(restaurante.nota)} font-bold`}>{restaurante.nota} ⭐</p>
               </div>
             </div>
