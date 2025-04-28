@@ -18,7 +18,7 @@ await client.connect();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Nova rota para buscar países disponíveis
+// Rota para buscar países disponíveis
 app.get('/api/paises', async (req, res) => {
   try {
     const result = await client.query(
@@ -31,14 +31,15 @@ app.get('/api/paises', async (req, res) => {
   }
 });
 
-// Nova rota para buscar regiões (parent_geo_name)
+// Rota para buscar regiões (parent_geo_name vindo do JSON)
 app.get('/api/regioes', async (req, res) => {
   const { pais } = req.query;
 
   try {
     const result = await client.query(
-      `SELECT DISTINCT parent_geo_name FROM restaurantes
-       WHERE pais = $1 AND parent_geo_name IS NOT NULL
+      `SELECT DISTINCT (avaliacao_json->>'parentGeoName') AS parent_geo_name
+       FROM restaurantes
+       WHERE pais = $1 AND avaliacao_json->>'parentGeoName' IS NOT NULL
        ORDER BY parent_geo_name`,
       [pais]
     );
@@ -46,6 +47,22 @@ app.get('/api/regioes', async (req, res) => {
   } catch (err) {
     console.error('Erro na consulta de regiões:', err);
     res.status(500).json({ error: 'Erro ao consultar regiões' });
+  }
+});
+
+// Rota para buscar categorias disponíveis
+app.get('/api/categorias', async (req, res) => {
+  const { pais } = req.query;
+
+  try {
+    const result = await client.query(
+      `SELECT DISTINCT categoria FROM restaurantes WHERE pais = $1 AND categoria IS NOT NULL ORDER BY categoria`,
+      [pais]
+    );
+    res.json(result.rows.map(r => r.categoria));
+  } catch (err) {
+    console.error('Erro na consulta de categorias:', err);
+    res.status(500).json({ error: 'Erro ao consultar categorias' });
   }
 });
 
@@ -61,7 +78,7 @@ app.get('/api/restaurantes', async (req, res) => {
 
   if (regiao) {
     params.push(regiao);
-    query += ` AND parent_geo_name = $${params.length}`;
+    query += ` AND avaliacao_json->>'parentGeoName' = $${params.length}`;
   }
 
   if (categoria) {

@@ -1,198 +1,109 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import './App.css';
 
 function App() {
+  const [paises, setPaises] = useState([]);
+  const [regioes, setRegioes] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [restaurantes, setRestaurantes] = useState([]);
-  const [paisesDisponiveis, setPaisesDisponiveis] = useState([]);
   const [paisSelecionado, setPaisSelecionado] = useState('');
-  const [regioesDisponiveis, setRegioesDisponiveis] = useState([]);
   const [regiaoSelecionada, setRegiaoSelecionada] = useState('');
-  const [notaMinima, setNotaMinima] = useState(0);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const [carregando, setCarregando] = useState(false);
-  const [erro, setErro] = useState(false);
-  const [categoriasDisponiveis, setCategoriasDisponiveis] = useState([
-    'Cafe', 'Indian', 'French', 'Japanese', 'Chinese', 'Seafood', 'Pizza', 'Steakhouse', 'Italian', 'Mexican'
-  ]);
+  const [notaMinima, setNotaMinima] = useState(0);
+  const [pagina, setPagina] = useState(1);
+  const resultsRef = useRef(null);
 
   useEffect(() => {
-    fetchPaises();
+    fetch('/api/paises')
+      .then(res => res.json())
+      .then(setPaises)
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
     if (paisSelecionado) {
-      fetchRegioes();
-      fetchRestaurantes();
+      fetch(`/api/regioes?pais=${encodeURIComponent(paisSelecionado)}`)
+        .then(res => res.json())
+        .then(setRegioes)
+        .catch(console.error);
+
+      fetch(`/api/categorias?pais=${encodeURIComponent(paisSelecionado)}`)
+        .then(res => res.json())
+        .then(setCategorias)
+        .catch(console.error);
     }
-  }, [paisSelecionado, notaMinima, categoriaSelecionada, paginaAtual, regiaoSelecionada]);
+  }, [paisSelecionado]);
 
-  const fetchPaises = async () => {
-    try {
-      const response = await fetch('/api/paises');
-      const data = await response.json();
-      setPaisesDisponiveis(data);
-      if (data.length > 0) {
-        setPaisSelecionado(data[0]);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar países:', error);
-    }
-  };
+  const buscarRestaurantes = () => {
+    const params = new URLSearchParams({
+      pais: paisSelecionado,
+      regiao: regiaoSelecionada,
+      categoria: categoriaSelecionada,
+      notaMinima,
+      pagina,
+    });
 
-  const fetchRegioes = async () => {
-    try {
-      const response = await fetch(`/api/regioes?pais=${paisSelecionado}`);
-      const data = await response.json();
-      setRegioesDisponiveis(data);
-      setRegiaoSelecionada('');
-    } catch (error) {
-      console.error('Erro ao buscar regiões:', error);
-    }
-  };
-
-  const fetchRestaurantes = async () => {
-    try {
-      setCarregando(true);
-      setErro(false);
-      const response = await fetch(`/api/restaurantes?pais=${paisSelecionado}&regiao=${regiaoSelecionada}&notaMinima=${notaMinima}&categoria=${categoriaSelecionada}&pagina=${paginaAtual}`);
-      const data = await response.json();
-      setRestaurantes(data);
-      const novasCategorias = new Set(categoriasDisponiveis);
-      data.forEach(item => {
-        if (item.categoria) novasCategorias.add(item.categoria);
-      });
-      setCategoriasDisponiveis(Array.from(novasCategorias));
-    } catch (error) {
-      console.error('Erro ao buscar restaurantes:', error);
-      setErro(true);
-    } finally {
-      setCarregando(false);
-    }
-  };
-
-  const handleImageError = (e) => {
-    e.target.onerror = null;
-    e.target.src = '/fallback.jpg';
-    e.target.alt = 'Imagem não disponível';
-    e.target.style.objectFit = 'contain';
-    e.target.style.backgroundColor = '#f0f0f0';
-  };
-
-  const corNota = (nota) => {
-    if (nota >= 4.5) return 'text-yellow-500';
-    if (nota >= 4) return 'text-green-400';
-    if (nota >= 3) return 'text-orange-400';
-    return 'text-red-400';
+    fetch(`/api/restaurantes?${params.toString()}`)
+      .then(res => res.json())
+      .then(data => {
+        setRestaurantes(data);
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+      })
+      .catch(console.error);
   };
 
   return (
-    <div className="p-6 min-h-screen bg-gradient-to-br from-blue-50 to-purple-100">
-      <h1 className="text-3xl font-extrabold text-center text-blue-800 mb-8">🌍 Explore Restaurantes pelo Mundo</h1>
+    <div className="App">
+      <h1>🌍 Explore Restaurantes pelo Mundo</h1>
 
-      <div className="flex flex-wrap justify-center gap-4 mb-8">
-        <select
-          className="border p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-          value={paisSelecionado}
-          onChange={(e) => {
-            setPaisSelecionado(e.target.value);
-            setPaginaAtual(1);
-          }}
-        >
-          {paisesDisponiveis.map((pais) => (
-            <option key={pais} value={pais}>{pais}</option>
+      <div className="filtros">
+        <select value={paisSelecionado} onChange={e => setPaisSelecionado(e.target.value)}>
+          <option value=''>Selecione um País</option>
+          {paises.map((pais, idx) => (
+            <option key={idx} value={pais}>{pais}</option>
           ))}
         </select>
 
-        <select
-          className="border p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-          value={regiaoSelecionada}
-          onChange={(e) => {
-            setRegiaoSelecionada(e.target.value);
-            setPaginaAtual(1);
-          }}
-        >
-          <option value="">Todas as regiões</option>
-          {regioesDisponiveis.map((regiao) => (
-            <option key={regiao} value={regiao}>{regiao}</option>
-          ))}
+        {regioes.length > 0 && (
+          <select value={regiaoSelecionada} onChange={e => setRegiaoSelecionada(e.target.value)}>
+            <option value=''>Todas as Regiões</option>
+            {regioes.map((r, idx) => (
+              <option key={idx} value={r}>{r}</option>
+            ))}
+          </select>
+        )}
+
+        {categorias.length > 0 && (
+          <select value={categoriaSelecionada} onChange={e => setCategoriaSelecionada(e.target.value)}>
+            <option value=''>Todas as Categorias</option>
+            {categorias.map((c, idx) => (
+              <option key={idx} value={c}>{c}</option>
+            ))}
+          </select>
+        )}
+
+        <select value={notaMinima} onChange={e => setNotaMinima(e.target.value)}>
+          <option value={0}>Nota mínima</option>
+          <option value={3}>3 estrelas</option>
+          <option value={4}>4 estrelas</option>
+          <option value={4.5}>4.5 estrelas</option>
+          <option value={5}>5 estrelas</option>
         </select>
 
-        <select
-          className="border p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-          value={notaMinima}
-          onChange={(e) => {
-            setNotaMinima(e.target.value);
-            setPaginaAtual(1);
-          }}
-        >
-          <option value={0}>Todas as notas</option>
-          <option value={4}>Nota 4+</option>
-          <option value={4.5}>Nota 4.5+</option>
-          <option value={5}>Nota 5</option>
-        </select>
-
-        <select
-          className="border p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-          value={categoriaSelecionada}
-          onChange={(e) => {
-            setCategoriaSelecionada(e.target.value);
-            setPaginaAtual(1);
-          }}
-        >
-          <option value="">Todas as categorias</option>
-          {categoriasDisponiveis.map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
+        <button onClick={buscarRestaurantes}>Buscar</button>
       </div>
 
-      {carregando ? (
-        <p className="text-center text-blue-600 animate-pulse">Carregando restaurantes...</p>
-      ) : erro ? (
-        <p className="text-center text-red-500">Erro ao carregar dados. Tente novamente.</p>
-      ) : restaurantes.length === 0 ? (
-        <p className="text-center text-gray-500">Nenhum restaurante encontrado para esses filtros.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {restaurantes.map((restaurante) => (
-            <div key={restaurante.location_id} className="border rounded-xl overflow-hidden shadow-lg bg-white hover:shadow-2xl transition">
-              <img 
-                src={restaurante.imagem_url || '/fallback.jpg'} 
-                alt={restaurante.nome || 'Imagem do restaurante'} 
-                className="w-full h-48 object-cover" 
-                onError={handleImageError}
-              />
-              <div className="p-4">
-                <h2 className="text-xl font-semibold truncate mb-1" title={restaurante.nome}>{restaurante.nome}</h2>
-                <p className="text-gray-600 text-sm mb-1 capitalize">{restaurante.categoria}</p>
-                <p className="text-gray-500 text-xs mb-1">{restaurante.parent_geo_name}</p>
-                <p className={`${corNota(restaurante.nota)} font-bold`}>{restaurante.nota} ⭐</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {!carregando && restaurantes.length > 0 && (
-        <div className="flex justify-center items-center gap-4 mt-10">
-          <button
-            className="px-4 py-2 bg-blue-200 hover:bg-blue-300 text-blue-800 font-semibold rounded-lg"
-            onClick={() => setPaginaAtual((p) => Math.max(p - 1, 1))}
-            disabled={paginaAtual === 1}
-          >
-            Página anterior
-          </button>
-
-          <span className="font-semibold">Página {paginaAtual}</span>
-
-          <button
-            className="px-4 py-2 bg-blue-200 hover:bg-blue-300 text-blue-800 font-semibold rounded-lg"
-            onClick={() => setPaginaAtual((p) => p + 1)}
-          >
-            Próxima página
-          </button>
-        </div>
-      )}
+      <div ref={resultsRef} className="resultados">
+        {restaurantes.length === 0 && <p>Nenhum restaurante encontrado. 🍽️</p>}
+        {restaurantes.map((r, idx) => (
+          <div key={idx} className="card">
+            <img src={r.imagem_url || '/default_restaurant.jpg'} alt={r.nome} onError={(e) => e.target.src='/default_restaurant.jpg'} />
+            <h2>{r.nome}</h2>
+            <p><strong>Categoria:</strong> {r.categoria}</p>
+            <p><strong>Nota:</strong> {r.nota || 'Sem avaliação'}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
