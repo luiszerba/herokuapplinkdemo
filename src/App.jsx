@@ -1,171 +1,169 @@
-import { useState, useEffect } from 'react';
-import Map, { NavigationControl, Marker } from 'react-map-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-
-const regions = [
-  { name: "Ásia", id: "asia", locationId: "304554" }, // Tóquio
-  { name: "Europa", id: "europa", locationId: "293928" }, // Paris
-  { name: "América do Sul", id: "sul", locationId: "303631" }, // São Paulo
-  { name: "África", id: "africa", locationId: "294207" }, // Nairobi
-  { name: "Oceania", id: "oceania", locationId: "255060" }, // Sydney
-];
+import React, { useEffect, useState } from 'react';
 
 function App() {
-  const [region, setRegion] = useState(null);
-  const [destinations, setDestinations] = useState([]);
-  const [showMap, setShowMap] = useState(false);
+  const [restaurantes, setRestaurantes] = useState([]);
+  const [paisesDisponiveis, setPaisesDisponiveis] = useState([]);
+  const [paisSelecionado, setPaisSelecionado] = useState('');
+  const [notaMinima, setNotaMinima] = useState(0);
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState(false);
+  const [categoriasDisponiveis, setCategoriasDisponiveis] = useState([
+    'Cafe', 'Indian', 'French', 'Japanese', 'Chinese', 'Seafood', 'Pizza', 'Steakhouse', 'Italian', 'Mexican'
+  ]);
 
   useEffect(() => {
-    async function fetchPlaces(regionInfo) {
-      console.log('Região selecionada:', regionInfo);
-      if (!regionInfo) return;
+    fetchPaises();
+  }, []);
 
-      const url = `https://tripadvisor16.p.rapidapi.com/api/v1/restaurant/searchRestaurants?locationId=${regionInfo.locationId}`;
-      const options = {
-        method: 'GET',
-        headers: {
-          'X-RapidAPI-Key': import.meta.env.VITE_RAPIDAPI_KEY,
-          'X-RapidAPI-Host': 'tripadvisor16.p.rapidapi.com'
-        }
-      };
-
-      try {
-        // Dados mockados caso a API falhe ou atinja o limite de requisições
-        const enriched = [
-          {
-            id: 'mock1',
-            name: 'Restaurante Estrela Paulista',
-            category: 'Brasileira Contemporânea',
-            latitude: -23.561684,
-            longitude: -46.625378,
-            rating: 5,
-            imageUrl: 'https://source.unsplash.com/400x200/?brazilian-restaurant',
-            reviews: [{
-              author: 'TripAdvisor',
-              date: '',
-              rating: 5,
-              text: 'Excelente atendimento e comida maravilhosa no coração de São Paulo!'
-            }]
-          },
-          {
-            id: 'mock2',
-            name: 'Cantina do Marco',
-            category: 'Italiana',
-            latitude: -23.562947,
-            longitude: -46.654321,
-            rating: 4,
-            imageUrl: 'https://source.unsplash.com/400x200/?italian-food',
-            reviews: [{
-              author: 'TripAdvisor',
-              date: '',
-              rating: 4,
-              text: 'Massas frescas e ambiente acolhedor. Voltaremos com certeza.'
-            }]
-          },
-          {
-            id: 'mock3',
-            name: 'Sabor do Oriente',
-            category: 'Asiática Fusion',
-            latitude: -23.555432,
-            longitude: -46.640987,
-            rating: 5,
-            imageUrl: 'https://source.unsplash.com/400x200/?asian-restaurant',
-            reviews: [{
-              author: 'TripAdvisor',
-              date: '',
-              rating: 5,
-              text: 'Uma explosão de sabores com pratos muito bem apresentados.'
-            }]
-          }
-        ];
-
-        console.log('Destinos mockados carregados:', enriched);
-        setDestinations(enriched);
-      } catch (error) {
-        console.error('Erro ao buscar dados da API RapidAPI TripAdvisor v16:', error);
-        setDestinations([]);
-      }
+  useEffect(() => {
+    if (paisSelecionado) {
+      fetchRestaurantes();
     }
+  }, [paisSelecionado, notaMinima, categoriaSelecionada, paginaAtual]);
 
-    fetchPlaces(region);
-  }, [region]);
+  const fetchPaises = async () => {
+    try {
+      const response = await fetch('/api/paises');
+      const data = await response.json();
+      setPaisesDisponiveis(data);
+      setPaisSelecionado(data[0] || '');
+    } catch (error) {
+      console.error('Erro ao buscar países:', error);
+    }
+  };
+
+  const fetchRestaurantes = async () => {
+    try {
+      setCarregando(true);
+      setErro(false);
+      const response = await fetch(`/api/restaurantes?pais=${paisSelecionado}&notaMinima=${notaMinima}&categoria=${categoriaSelecionada}&pagina=${paginaAtual}`);
+      const data = await response.json();
+      setRestaurantes(data);
+      const novasCategorias = new Set(categoriasDisponiveis);
+      data.forEach(item => {
+        if (item.categoria) novasCategorias.add(item.categoria);
+      });
+      setCategoriasDisponiveis(Array.from(novasCategorias));
+    } catch (error) {
+      console.error('Erro ao buscar restaurantes:', error);
+      setErro(true);
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const handleImageError = (e) => {
+    e.target.onerror = null;
+    e.target.src = '/fallback.jpg';
+    e.target.alt = 'Imagem não disponível';
+    e.target.style.objectFit = 'contain';
+    e.target.style.backgroundColor = '#f0f0f0';
+  };
+
+  const corNota = (nota) => {
+    if (nota >= 4.5) return 'text-yellow-500';
+    if (nota >= 4) return 'text-green-400';
+    if (nota >= 3) return 'text-orange-400';
+    return 'text-red-400';
+  };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 px-6 py-12 text-gray-800 font-sans">
-      <div className="text-center max-w-4xl mx-auto mb-12">
-        <h1 className="text-5xl font-extrabold mb-4 text-indigo-700">🌍 Missão Viagem</h1>
-        <p className="text-lg text-indigo-900">Clique em uma região e descubra sua próxima aventura!</p>
+    <div className="p-6 min-h-screen bg-gradient-to-br from-blue-50 to-purple-100">
+      <h1 className="text-3xl font-extrabold text-center text-blue-800 mb-8">🌍 Explore Restaurantes pelo Mundo</h1>
+
+      <div className="flex flex-wrap justify-center gap-4 mb-8">
+        <select
+          className="border p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={paisSelecionado}
+          onChange={(e) => {
+            setPaisSelecionado(e.target.value);
+            setPaginaAtual(1);
+          }}
+        >
+          {paisesDisponiveis.map((pais) => (
+            <option key={pais} value={pais}>{pais}</option>
+          ))}
+        </select>
+
+        <select
+          className="border p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={notaMinima}
+          onChange={(e) => {
+            setNotaMinima(e.target.value);
+            setPaginaAtual(1);
+          }}
+        >
+          <option value={0}>Todas as notas</option>
+          <option value={4}>Nota 4+</option>
+          <option value={4.5}>Nota 4.5+</option>
+          <option value={5}>Nota 5</option>
+        </select>
+
+        <select
+          className="border p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={categoriaSelecionada}
+          onChange={(e) => {
+            setCategoriaSelecionada(e.target.value);
+            setPaginaAtual(1);
+          }}
+        >
+          <option value="">Todas as categorias</option>
+          {categoriasDisponiveis.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
       </div>
 
-      <div className="flex flex-col-reverse lg:flex-row max-w-7xl mx-auto gap-10">
-        {/* Conteúdo principal */}
-        <div className="flex-1">
-          <div className="flex justify-center gap-3 flex-wrap mb-8">
-            {regions.map((r) => (
-              <button
-                key={r.id}
-                onClick={() => setRegion(r)}
-                className="bg-white text-indigo-700 border border-indigo-300 px-5 py-2.5 rounded-full shadow hover:scale-105 hover:bg-indigo-100 transition font-medium"
-              >
-                {r.name}
-              </button>
-            ))}
-          </div>
-
-          {region && (
-            <section>
-              <h2 className="text-2xl font-semibold mb-6 text-center text-indigo-800">Sugestões para {region.name}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {destinations.map((place) => (
-                  <div key={place.id} className="bg-white rounded-2xl shadow-md p-4 hover:scale-[1.02] transition-transform">
-                    <img src={place.imageUrl} alt={place.name} className="w-full h-44 object-cover rounded-xl mb-3" />
-                    <h3 className="text-lg font-bold text-indigo-700 mb-1">{place.name}</h3>
-                    <p className="text-sm text-gray-500 mb-1">{place.category} — Nota: {place.rating} ⭐</p>
-                    <p className="text-sm text-gray-700 italic">“{place.reviews[0]?.text}”</p>
-                  </div>
-                ))}
+      {carregando ? (
+        <p className="text-center text-blue-600 animate-pulse">Carregando restaurantes...</p>
+      ) : erro ? (
+        <p className="text-center text-red-500">Erro ao carregar dados. Tente novamente.</p>
+      ) : restaurantes.length === 0 ? (
+        <p className="text-center text-gray-500">Nenhum restaurante encontrado para esses filtros.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {restaurantes.map((restaurante) => (
+            <div key={restaurante.location_id} className="border rounded-xl overflow-hidden shadow-lg bg-white hover:shadow-2xl transition">
+              <img 
+                src={restaurante.imagem_url || '/fallback.jpg'} 
+                alt={restaurante.nome || 'Imagem do restaurante'} 
+                className="w-full h-48 object-cover" 
+                onError={handleImageError}
+              />
+              <div className="p-4">
+                <h2 className="text-xl font-semibold truncate mb-1" title={restaurante.nome}>{restaurante.nome}</h2>
+                <p className="text-gray-500 text-xs mb-1 capitalize">{restaurante.avaliacao_json?.parentGeoName}</p>
+                <p className="text-gray-600 text-sm mb-1 capitalize">{restaurante.categoria}</p>
+                <p className={`${corNota(restaurante.nota)} font-bold`}>{restaurante.nota} ⭐</p>
               </div>
-            </section>
-          )}
-        </div>
-
-        {/* Painel com botão e mapa */}
-        <div className="w-full lg:w-[340px]">
-          <button
-            onClick={() => setShowMap(!showMap)}
-            className="mb-4 bg-indigo-600 text-white px-4 py-2 rounded-xl shadow hover:bg-indigo-700 transition w-full"
-          >
-            {showMap ? 'Ocultar Mapa 🗺️' : 'Mostrar Mapa 🗺️'}
-          </button>
-          {showMap && (
-            <div className="rounded-xl overflow-hidden shadow-lg w-full" style={{ height: 400 }}>
-              <Map
-                mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
-                initialViewState={{
-                  latitude: 0,
-                  longitude: 0,
-                  zoom: 1.5,
-                }}
-                mapStyle="mapbox://styles/mapbox/light-v11"
-                style={{ width: '100%', height: '100%' }}
-              >
-                <NavigationControl position="top-left" />
-                {destinations.map((place) => (
-                  <Marker
-                    key={place.id}
-                    longitude={place.longitude}
-                    latitude={place.latitude}
-                    anchor="bottom"
-                  >
-                    <div className="text-xl">📍</div>
-                  </Marker>
-                ))}
-              </Map>
             </div>
-          )}
+          ))}
         </div>
-      </div>
-    </main>
+      )}
+
+      {!carregando && restaurantes.length > 0 && (
+        <div className="flex justify-center items-center gap-4 mt-10">
+          <button
+            className="px-4 py-2 bg-blue-200 hover:bg-blue-300 text-blue-800 font-semibold rounded-lg"
+            onClick={() => setPaginaAtual((p) => Math.max(p - 1, 1))}
+            disabled={paginaAtual === 1}
+          >
+            Página anterior
+          </button>
+
+          <span className="font-semibold">Página {paginaAtual}</span>
+
+          <button
+            className="px-4 py-2 bg-blue-200 hover:bg-blue-300 text-blue-800 font-semibold rounded-lg"
+            onClick={() => setPaginaAtual((p) => p + 1)}
+          >
+            Próxima página
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
