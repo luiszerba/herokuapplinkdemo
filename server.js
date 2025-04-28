@@ -52,13 +52,14 @@ app.get('/api/regioes', async (req, res) => {
 
 // Rota para buscar categorias disponíveis
 app.get('/api/categorias', async (req, res) => {
-  const { pais } = req.query;
-
+  const { regiao } = req.query;
+  console.log(regiao);
   try {
     const result = await client.query(
-      `SELECT DISTINCT categoria FROM restaurantes WHERE pais = $1 AND categoria IS NOT NULL ORDER BY categoria`,
-      [pais]
+      `SELECT DISTINCT categoria FROM restaurantes WHERE avaliacao_json->>'parentGeoName' = $1 AND categoria IS NOT NULL ORDER BY categoria`,
+      [regiao]
     );
+    console.log(result.rows);
     res.json(result.rows.map(r => r.categoria));
   } catch (err) {
     console.error('Erro na consulta de categorias:', err);
@@ -98,6 +99,7 @@ app.get('/api/restaurantes', async (req, res) => {
   }
 });
 
+// Servir frontend
 app.use(express.static(path.join(__dirname, 'dist')));
 
 app.get('*', (req, res) => {
