@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import Modal from './compoonents/Modal';
 
 export default function App() {
   const [paises, setPaises] = useState([]);
@@ -12,6 +13,7 @@ export default function App() {
   const [pagina, setPagina] = useState(1);
   const [temMais, setTemMais] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState(null);
   const resultsRef = useRef(null);
 
   useEffect(() => {
@@ -99,26 +101,26 @@ export default function App() {
   }, [pagina]);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-4xl font-bold mb-8 text-center">🌎 Explore Restaurantes pelo Mundo</h1>
+    <div className="p-6 max-w-5xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-center">Explore Restaurantes</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-        <select value={selectedPais} onChange={e => setSelectedPais(e.target.value)} className="p-3 border rounded">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <select value={selectedPais} onChange={e => setSelectedPais(e.target.value)} className="p-2 border rounded">
           <option value="">Selecione o país</option>
           {paises.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
 
-        <select value={selectedRegiao} onChange={e => setSelectedRegiao(e.target.value)} className="p-3 border rounded">
+        <select value={selectedRegiao} onChange={e => setSelectedRegiao(e.target.value)} className="p-2 border rounded">
           <option value="">Todas as regiões</option>
           {regioes.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
 
-        <select value={selectedCategoria} onChange={e => setSelectedCategoria(e.target.value)} className="p-3 border rounded">
+        <select value={selectedCategoria} onChange={e => setSelectedCategoria(e.target.value)} className="p-2 border rounded">
           <option value="">Todas as categorias</option>
-          {categorias.map(c => <option key={c} value={c}>{c}</option>)}
+          {categorias.length > 0 && categorias.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
 
-        <select value={notaMinima} onChange={e => setNotaMinima(Number(e.target.value))} className="p-3 border rounded">
+        <select value={notaMinima} onChange={e => setNotaMinima(Number(e.target.value))} className="p-2 border rounded">
           <option value={0}>Todas as notas</option>
           <option value={5}>⭐⭐⭐⭐⭐</option>
           <option value={4}>⭐⭐⭐⭐</option>
@@ -126,34 +128,49 @@ export default function App() {
           <option value={2}>⭐⭐</option>
           <option value={1}>⭐</option>
         </select>
-
-        <div className="flex gap-2">
-          <button onClick={handleFilter} className="bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded transition">Buscar</button>
-          <button onClick={handleClearFilters} className="bg-gray-600 hover:bg-gray-800 text-white px-4 py-2 rounded transition">Limpar</button>
-        </div>
       </div>
 
-      {loading && <p className="text-center mb-6">🔄 Carregando...</p>}
+      <div className="flex justify-center gap-4 mb-6">
+        <button onClick={handleFilter} className="bg-blue-600 hover:bg-blue-800 text-white px-6 py-2 rounded">
+          Buscar
+        </button>
+        <button onClick={handleClearFilters} className="bg-gray-600 hover:bg-gray-800 text-white px-6 py-2 rounded">
+          Limpar
+        </button>
+      </div>
 
-      <div ref={resultsRef} className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {loading && <p className="text-center mb-6">Carregando...</p>}
+
+      <div ref={resultsRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {places.map(place => (
-          <div key={place.id} className="border rounded-lg shadow hover:shadow-lg p-4 transform hover:scale-105 transition">
+          <div key={place.id} className="border rounded shadow p-4 cursor-pointer" onClick={() => setSelectedPlace(place)}>
             <img
               src={place.imagem_url || '/placeholder.png'}
               alt={place.nome}
-              className="w-full h-48 object-cover rounded mb-4 aspect-square transition-all duration-500 ease-in-out"
-              onError={(e) => { e.target.src = '/placeholder.png'; }}
+              className="w-full h-40 object-cover rounded mb-4 max-h-48 aspect-square transition-all duration-500 ease-in-out opacity-0 blur-sm border border-gray-300"
+              onLoad={(e) => {
+                e.target.classList.remove('opacity-0', 'blur-sm', 'border-gray-300');
+                e.target.classList.add('opacity-100');
+              }}
+              onError={(e) => {
+                e.target.src = '/placeholder.png';
+                e.target.className = 'w-full h-40 object-cover rounded mb-4 max-h-48 aspect-square opacity-100 blur-sm border border-gray-300';
+              }}
             />
-            <h2 className="font-bold text-lg mb-1">{place.nome}</h2>
-            <p className="text-gray-600 mb-1">{place.categoria || 'Sem categoria'}</p>
-            <p className="text-yellow-500 mb-1">{place.nota ? `⭐ ${place.nota}` : 'Sem nota'}</p>
+            <h2 className="font-bold text-xl mb-2">{place.nome}</h2>
+            <p className="text-gray-600 mb-2">{place.categoria || 'Sem categoria'}</p>
+            <p className="text-yellow-500 mb-2">{place.nota ? `⭐ ${place.nota}` : 'Sem nota'}</p>
             <p className="text-sm text-gray-500">{place.parent_geo_name}</p>
           </div>
         ))}
       </div>
 
       {!loading && places.length === 0 && (
-        <p className="text-center text-gray-500 mt-10">🚫 Nenhum restaurante encontrado. Tente outros filtros!</p>
+        <p className="text-center text-gray-600 mt-6">Nenhum restaurante encontrado para esses filtros.</p>
+      )}
+
+      {selectedPlace && (
+        <Modal place={selectedPlace} onClose={() => setSelectedPlace(null)} />
       )}
     </div>
   );
