@@ -110,7 +110,6 @@ app.get('/api/restaurantes/:locationId', async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Restaurante não encontrado' });
     }
-    console.log(result.rows[0]);
     res.json(result.rows[0]);
   } catch (err) {
     console.error('Erro ao buscar detalhes do restaurante:', err);
