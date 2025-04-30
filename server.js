@@ -101,17 +101,16 @@ app.get('/api/restaurantes', async (req, res) => {
 
 app.get('/api/restaurantes/:locationId', async (req, res) => {
   const { locationId } = req.params;
-
   try {
     const result = await client.query(
-      `SELECT * FROM restaurantes WHERE location_id = $1 LIMIT 1`,
+      `SELECT detalhes_json FROM restaurantes WHERE location_id = $1 LIMIT 1`,
       [locationId]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Restaurante não encontrado' });
     }
-
+    console.log(result.rows[0]);
     res.json(result.rows[0]);
   } catch (err) {
     console.error('Erro ao buscar detalhes do restaurante:', err);

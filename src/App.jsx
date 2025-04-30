@@ -143,7 +143,16 @@ export default function App() {
 
       <div ref={resultsRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {places.map(place => (
-          <div key={place.id} className="border rounded shadow p-4 cursor-pointer" onClick={() => setSelectedPlace(place)}>
+          <div key={place.id} className="border rounded shadow p-4 cursor-pointer" 
+          onClick={async () => {
+              try {
+                const res = await fetch(`/api/restaurantes/${place.location_id}`);
+                const data = await res.json();
+                setSelectedPlace(data);
+              } catch (error) {
+                console.error('Erro ao buscar detalhes do restaurante:', error);
+              }
+            }}>
             <img
               src={place.imagem_url || '/placeholder.png'}
               alt={place.nome}
@@ -169,7 +178,7 @@ export default function App() {
         <p className="text-center text-gray-600 mt-6">Nenhum restaurante encontrado para esses filtros.</p>
       )}
 
-      {selectedPlace && (
+      {selectedPlace && selectedPlace.detalhes_json && (
         <Modal place={selectedPlace} onClose={() => setSelectedPlace(null)} />
       )}
     </div>

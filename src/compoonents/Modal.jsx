@@ -1,64 +1,117 @@
 import { motion } from 'framer-motion';
 
 export default function Modal({ place, onClose }) {
-  const avaliacao = place.avaliacao_json ? JSON.parse(place.avaliacao_json) : {};
+  const detalhe = place?.detalhes_json;
+  if (!detalhe) return null;
+
+  const imageUrl = detalhe?.heroMedia?.media?.[0]?.url || '/placeholder.png';
+  const name = detalhe?.overview?.name || place.nome || 'Restaurante';
+  const rating = detalhe?.overview?.rating || place.nota || null;
+  const address = detalhe?.location?.address?.address || 'Endereço não informado';
+  const neighborhood = detalhe?.location?.neighborhood?.text || '';
+  const aboutItems = detalhe?.restaurantAbout?.content?.map(item => item?.collapsibleTextSubsection?.title || item?.collapsibleTextSubsectionText?.text)?.filter(Boolean) || [];
+  const openHours = detalhe?.openHours?.hoursForDays || [];
+  const facilities = detalhe?.about?.content?.flatMap(f => f?.list?.map(l => l.text) || []) || [];
+  const reviews = detalhe?.reviews?.content || [];
+  const questions = detalhe?.qA?.content || [];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <motion.div 
-        initial={{ scale: 0.7, opacity: 0 }} 
-        animate={{ scale: 1, opacity: 1 }} 
-        exit={{ scale: 0.7, opacity: 0 }}
-        className="bg-white rounded-lg p-6 w-full max-w-xl shadow-lg overflow-y-auto max-h-[90vh] relative"
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 overflow-auto p-6">
+      <motion.div
+        initial={{ scale: 0.7 }}
+        animate={{ scale: 1 }}
+        exit={{ scale: 0 }}
+        className="bg-white rounded-lg overflow-hidden shadow-lg w-full max-w-4xl relative"
       >
-        <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 hover:text-gray-700">
-          ✕
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
+        >
+          ✖
         </button>
 
-        <img 
-          src={place.imagem_url || '/placeholder.png'} 
-          alt={place.nome} 
-          className="w-full h-48 object-cover rounded mb-4"
-          onError={(e) => { e.target.src = '/placeholder.png'; }}
+        <img
+          src={imageUrl}
+          alt={name}
+          onError={(e) => {
+            e.target.src = '/placeholder.png';
+            e.target.className = 'w-full h-60 object-cover';
+          }}
+          className="w-full h-60 object-cover"
         />
 
-        <h2 className="text-2xl font-bold mb-2">{place.nome}</h2>
-        <p className="text-gray-600 mb-2">{place.categoria || 'Categoria não definida'}</p>
-        <p className="text-yellow-500 mb-4">{place.nota ? `⭐ ${place.nota}` : 'Sem nota'}</p>
+        <div className="p-6 space-y-4">
+          <h2 className="text-3xl font-bold">{name}</h2>
+          {rating && <p className="text-yellow-500">⭐ {rating}</p>}
+          <p className="text-gray-600">{address}{neighborhood && ` - ${neighborhood}`}</p>
 
-        {avaliacao.priceTag && (
-          <p className="text-green-700 font-semibold mb-2">Preço: {avaliacao.priceTag}</p>
-        )}
+          {aboutItems.length > 0 && (
+            <section>
+              <h3 className="text-xl font-semibold mt-4">Sobre</h3>
+              <ul className="list-disc pl-5">
+                {aboutItems.map((item, idx) => (
+                  <li key={idx} className="text-gray-700">{item}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-        {avaliacao.parentGeoName && (
-          <p className="text-gray-500 mb-2">Região: {avaliacao.parentGeoName}</p>
-        )}
+          {openHours.length > 0 && (
+            <section>
+              <h3 className="text-xl font-semibold mt-4">Horário de Funcionamento</h3>
+              <ul className="list-disc pl-5">
+                {openHours.map((day, idx) => {
+                  const interval = day?.localizedIntervals?.[0]?.text;
+                  return (
+                    <li key={idx} className="text-gray-700">
+                      {day.dayName}: {interval || '—'}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
 
-        {avaliacao.establishmentTypeAndCuisineTags && avaliacao.establishmentTypeAndCuisineTags.length > 0 && (
-          <div className="mb-4">
-            <h3 className="font-semibold mb-1">Culinárias:</h3>
-            <ul className="list-disc list-inside">
-              {avaliacao.establishmentTypeAndCuisineTags.map((tag, index) => (
-                <li key={index}>{tag}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+          {facilities.length > 0 && (
+            <section>
+              <h3 className="text-xl font-semibold mt-4">Facilidades</h3>
+              <ul className="list-disc pl-5">
+                {facilities.map((item, idx) => (
+                  <li key={idx} className="text-gray-700">{item}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-        {avaliacao.description && (
-          <p className="text-gray-700 mb-4">{avaliacao.description}</p>
-        )}
+          {reviews.length > 0 && (
+            <section>
+              <h3 className="text-xl font-semibold mt-4">Avaliações</h3>
+              <ul className="list-disc pl-5">
+                {reviews.slice(0, 3).map((review, idx) => (
+                  <li
+                    key={idx}
+                    className="text-gray-700 italic"
+                    dangerouslySetInnerHTML={{ __html: review.htmlText?.text || '' }}
+                  />
+                ))}
+              </ul>
+            </section>
+          )}
 
-        {avaliacao.webUrl && (
-          <a 
-            href={avaliacao.webUrl} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="block text-center bg-blue-600 hover:bg-blue-800 text-white py-2 rounded mt-4"
-          >
-            Ver no TripAdvisor
-          </a>
-        )}
+          {questions.length > 0 && (
+            <section>
+              <h3 className="text-xl font-semibold mt-4">Perguntas Frequentes</h3>
+              <ul className="list-disc pl-5">
+                {questions.slice(0, 3).map((q, idx) => (
+                  <li key={idx} className="text-gray-700">
+                    <strong>Pergunta:</strong> {q?.question?.text || '—'}<br />
+                    <strong>Resposta:</strong> {q?.topAnswer?.text || 'Sem resposta'}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
       </motion.div>
     </div>
   );
