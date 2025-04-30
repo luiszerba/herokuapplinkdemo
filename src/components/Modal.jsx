@@ -79,6 +79,7 @@ export default function Modal({ place, onClose }) {
     document.getElementById(`modal-heart-${place.id}`).innerText = isFav ? '❤️' : '🤍';
   }} className="text-xl text-red-500 hover:scale-110 transition-transform">
     <span id={`modal-heart-${place.id}`}>{JSON.parse(localStorage.getItem('favoritos') || '[]').includes(place.id) ? '❤️' : '🤍'}</span>
+    
   </button>
 </div>
           {rating && <p className="text-yellow-500 mb-1">⭐ {rating}</p>}

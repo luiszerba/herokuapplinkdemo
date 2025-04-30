@@ -11,7 +11,24 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 
-    <script>
+    <script type='text/javascript'>
+      function initEmbeddedMessaging() {
+        try {
+          embeddedservice_bootstrap.settings.language = 'en_US'; // For example, enter 'en' or 'en-US'
+    
+          embeddedservice_bootstrap.init(
+            '00DHs00000HIRTk',
+            'SDO_Messaging_for_Web',
+            'https://storm-04dd1cb768ee3e.my.site.com/ESWSDOMessagingforWeb1734615879047',
+            {
+              scrt2URL: 'https://storm-04dd1cb768ee3e.my.salesforce-scrt.com'
+            }
+          );
+        } catch (err) {
+          console.error('Error loading Embedded Messaging: ', err);
+        }
+      };
     </script>
+    <script type='text/javascript' src='https://storm-04dd1cb768ee3e.my.site.com/ESWSDOMessagingforWeb1734615879047/assets/js/bootstrap.min.js' onload='initEmbeddedMessaging()'></script>  
   </body>
 </html>
