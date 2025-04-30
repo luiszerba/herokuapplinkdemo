@@ -10,10 +10,9 @@ export default function Modal({ place, onClose }) {
     if (Array.isArray(sizes) && sizes.length > 0) {
       return sizes[sizes.length - 1].url;
     }
-    return '/placeholder.png';
+    return '/placeholder-small.jpg';
   })();
 
-  
   const name = detalhe?.overview?.name || place.nome || 'Restaurante';
   const rating = detalhe?.overview?.rating || place.nota || null;
   const address = detalhe?.location?.address?.address || 'Endereço não informado';
@@ -35,12 +34,16 @@ export default function Modal({ place, onClose }) {
   const [activeTab, setActiveTab] = useState('sobre');
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 overflow-auto p-6">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-70 z-50 overflow-auto p-4 sm:p-6 flex justify-center items-center"
+      onClick={onClose}
+    >
       <motion.div
+        onClick={(e) => e.stopPropagation()}
         initial={{ scale: 0.7 }}
         animate={{ scale: 1 }}
         exit={{ scale: 0 }}
-        className="bg-white rounded-lg overflow-hidden shadow-lg w-full max-w-4xl relative"
+        className="bg-white rounded-lg overflow-hidden shadow-lg w-full max-w-4xl relative mx-auto"
       >
         <button
           onClick={onClose}
@@ -53,24 +56,23 @@ export default function Modal({ place, onClose }) {
           src={imageUrl}
           alt={name}
           onError={(e) => {
-            e.target.src = '/placeholder.png';
+            e.target.src = '/placeholder-small.jpg';
             e.target.className = 'w-full h-60 object-cover';
           }}
           className="w-full h-60 object-cover"
         />
 
-        <div className="p-6">
-          <h2 className="text-3xl font-bold mb-1">{name}</h2>
+        <div className="p-4 sm:p-6">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-1">{name}</h2>
           {rating && <p className="text-yellow-500 mb-1">⭐ {rating}</p>}
-          <p className="text-gray-600 mb-4">{address}{neighborhood && ` - ${neighborhood}`}</p>
+          <p className="text-gray-600 mb-4 text-sm sm:text-base">{address}{neighborhood && ` - ${neighborhood}`}</p>
 
-          {/* Abas */}
-          <div className="flex gap-2 border-b mb-4">
+          <div className="flex gap-2 border-b mb-4 overflow-x-auto text-sm sm:text-base">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 ${activeTab === tab.id ? 'border-b-4 border-blue-500 font-semibold' : 'text-gray-500'}`}
+                className={`px-3 sm:px-4 py-2 whitespace-nowrap ${activeTab === tab.id ? 'border-b-4 border-blue-500 font-semibold' : 'text-gray-500'}`}
               >
                 {tab.label}
               </button>
