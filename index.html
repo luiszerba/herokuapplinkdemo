@@ -42,11 +42,8 @@
     
         console.log( `usuario:${email}`);
         // Send data to Salesforce
-        embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({"Order_Number" : "867-5309",
-            "Customer_ID" : "11098324"});
+        embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({"customeremail" : email});
     
-        // Remove any items from the previous list that you don't want to send
-        embeddedservice_bootstrap.prechatAPI.removeHiddenPrechatFields(["Customer_ID"]);
       });
     </script>
     <script
