@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -11,11 +10,17 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 
-    <script type='text/javascript'>
+    <!-- Salesforce Embedded Messaging -->
+    <script type="text/javascript">
       function initEmbeddedMessaging() {
         try {
-          embeddedservice_bootstrap.settings.language = 'en_US'; // For example, enter 'en' or 'en-US'
-    
+          const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+          const email = usuario?.email || '';
+
+          embeddedservice_bootstrap.settings.language = 'en_US';
+      
+          embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({Email: email});
+
           embeddedservice_bootstrap.init(
             '00DHs00000HIRTk',
             'SDO_Messaging_for_Web',
@@ -27,8 +32,12 @@
         } catch (err) {
           console.error('Error loading Embedded Messaging: ', err);
         }
-      };
+      }
     </script>
-    <script type='text/javascript' src='https://storm-04dd1cb768ee3e.my.site.com/ESWSDOMessagingforWeb1734615879047/assets/js/bootstrap.min.js' onload='initEmbeddedMessaging()'></script>  
+    <script
+      type="text/javascript"
+      src="https://storm-04dd1cb768ee3e.my.site.com/ESWSDOMessagingforWeb1734615879047/assets/js/bootstrap.min.js"
+      onload="initEmbeddedMessaging()"
+    ></script>
   </body>
 </html>
