@@ -46,7 +46,7 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
         useremail__c: { string: usuario.email },
         favoritado__c: { string: isAdding.toString() },
         Name__c: { string: usuario.nome || 'Anônimo' }
-      });)
+      }));
       await fetch(`${import.meta.env.HEROKUEVENTS_PUBLISH_URL}/RestFavorites`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
