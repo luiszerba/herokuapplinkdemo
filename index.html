@@ -19,8 +19,7 @@
 
           embeddedservice_bootstrap.settings.language = 'en_US';
       
-          embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({Email: email});
-
+      
           embeddedservice_bootstrap.init(
             '00DHs00000HIRTk',
             'SDO_Messaging_for_Web',
@@ -33,6 +32,21 @@
           console.error('Error loading Embedded Messaging: ', err);
         }
       }
+    </script>
+    <script>
+      window.addEventListener("onEmbeddedMessagingReady", () => {
+        console.log("Received the onEmbeddedMessagingReady event…");
+
+        const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+        const email = usuario?.email || '';
+    
+        // Send data to Salesforce
+        embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({"Order_Number" : "867-5309",
+            "Customer_ID" : "11098324"});
+    
+        // Remove any items from the previous list that you don't want to send
+        embeddedservice_bootstrap.prechatAPI.removeHiddenPrechatFields(["Customer_ID"]);
+      });
     </script>
     <script
       type="text/javascript"
