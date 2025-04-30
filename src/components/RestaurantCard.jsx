@@ -47,13 +47,16 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
         Name__c: { string: usuario.nome || 'Anônimo' }
       };
 
-      const response = await fetch('/RestFavorites', {
+      const url = new URL('/api/RestFavorites', window.location.origin);
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
       const result = await response.text();
+      console.log('[payload enviado]:', JSON.stringify(payload, null, 2));
       console.log('📤 Evento enviado. Resposta:', result);
     } catch (err) {
       console.error('Erro ao enviar evento:', err);

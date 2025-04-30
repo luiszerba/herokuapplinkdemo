@@ -20,6 +20,8 @@ await client.connect();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+app.use(express.json()); // <- precisa estar presente
+
 // Rota para buscar países disponíveis
 app.get('/api/paises', async (req, res) => {
   try {
@@ -101,9 +103,12 @@ app.get('/api/restaurantes', async (req, res) => {
   }
 });
 
-app.post('/RestFavorites', async (req, res) => {
+app.post('/api/RestFavorites', async (req, res) => {
   const payload = req.body;
   const fullUrl = process.env.HEROKUEVENTS_PUBLISH_URL;
+
+  console.log('[payload recebido]:', JSON.stringify(payload, null, 2));
+
 
   if (!fullUrl) {
     return res.status(500).json({ error: 'HEROKUEVENTS_PUBLISH_URL não definida' });
