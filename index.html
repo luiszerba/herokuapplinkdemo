@@ -40,6 +40,7 @@
         const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
         const email = usuario?.email || '';
     
+        console.log( `usuario:%{email}`);
         // Send data to Salesforce
         embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({"Order_Number" : "867-5309",
             "Customer_ID" : "11098324"});
