@@ -13,22 +13,46 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
     }
   }, [place.id, initialFavorite]);
 
-  const toggleFavorite = (e) => {
+  const toggleFavorite = async (e) => {
     e.stopPropagation();
-    const loggedIn = localStorage.getItem('usuario');
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    const loggedIn = usuario?.email;
     if (!loggedIn) {
       onRequireLogin();
       return;
     }
+
     let favoritos = JSON.parse(localStorage.getItem('favoritos') || '[]');
+    let isAdding = true;
+
     if (favoritos.includes(place.id)) {
       favoritos = favoritos.filter(id => id !== place.id);
       setIsFavorite(false);
+      isAdding = false;
     } else {
       favoritos.push(place.id);
       setIsFavorite(true);
     }
+
     localStorage.setItem('favoritos', JSON.stringify(favoritos));
+
+    // Enviar evento para o Event Bus do Salesforce
+    try {
+      await fetch(`${import.meta.env.VITE_HEROKUEVENTS_PUBLISH_URL}/RestFavorites`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          CreatedDate: Date.now(),
+          CreatedById: '005Hs00000Grqj2IAB',
+          locationid__c: { string: place.id },
+          restaurant_name__c: { string: place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' },
+          useremail__c: { string: usuario.email },
+          favoritado__c: { string: isAdding.toString() }
+        })
+      });
+    } catch (err) {
+      console.error('Erro ao enviar evento:', err);
+    }
   };
 
   const imageUrl =
