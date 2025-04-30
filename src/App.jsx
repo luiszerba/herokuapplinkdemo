@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
-import Modal from './compoonents/Modal';
+import Modal from './components/Modal';
+import CadastroModal from './components/CadastroModal';
+import RestaurantCard from './components/RestaurantCard';
 
 export default function App() {
   const [paises, setPaises] = useState([]);
@@ -14,6 +16,10 @@ export default function App() {
   const [temMais, setTemMais] = useState(true);
   const [loading, setLoading] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState(null);
+  const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
+  const [qtdFavoritos, setQtdFavoritos] = useState(0);
+  const [favoritosVisiveis, setFavoritosVisiveis] = useState([]);
+  const [showCadastroModal, setShowCadastroModal] = useState(false);
   const resultsRef = useRef(null);
 
   useEffect(() => {
@@ -81,6 +87,10 @@ export default function App() {
     setPlaces([]);
     setPagina(1);
     setTemMais(true);
+    localStorage.removeItem('usuario');
+    localStorage.removeItem('favoritos');
+    setQtdFavoritos(0);
+    setMostrarFavoritos(false);
   };
 
   useEffect(() => {
@@ -95,14 +105,48 @@ export default function App() {
   }, [temMais, loading]);
 
   useEffect(() => {
+    const favs = JSON.parse(localStorage.getItem('favoritos') || '[]');
+    setQtdFavoritos(favs.length);
+  }, [mostrarFavoritos, places]);
+
+  useEffect(() => {
     if (pagina > 1) {
       fetchPlaces();
     }
   }, [pagina]);
 
+  const handleRequireLogin = () => {
+    setShowCadastroModal(true);
+  };
+
+  const handleCadastroSucesso = (usuario) => {
+    console.log('Usuário cadastrado:', usuario);
+    handleToggleFavorite();
+  };
+
+  const carregarFavoritos = async () => {
+    const favs = JSON.parse(localStorage.getItem('favoritos') || '[]');
+    const results = await Promise.allSettled(
+      favs.map(id => fetch(`/api/restaurantes/${id}`).then(res => res.ok ? res.json() : null))
+    );
+    const favoritos = results.filter(r => r.status === 'fulfilled' && r.value).map(r => r.value);
+    console.log('✅ Restaurantes carregados via allSettled:', favoritos);
+    setFavoritosVisiveis(favoritos);
+  };
+
+  const handleToggleFavorite = () => {
+    const favs = JSON.parse(localStorage.getItem('favoritos') || '[]');
+    console.log('🧠 Favoritos salvos no localStorage:', favs);
+    setQtdFavoritos(favs.length);
+    setPlaces(prev => [...prev]);
+
+    if (mostrarFavoritos) carregarFavoritos();
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">Explore Restaurantes</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Restaurantes</h1>
+      <h3> Escolha as opções desejadas e faça o agendamento pelo nosso agente</h3><br/>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <select value={selectedPais} onChange={e => setSelectedPais(e.target.value)} className="p-2 border rounded">
@@ -137,49 +181,61 @@ export default function App() {
         <button onClick={handleClearFilters} className="bg-gray-600 hover:bg-gray-800 text-white px-6 py-2 rounded">
           Limpar
         </button>
+        <button
+          onClick={() => {
+            const favs = JSON.parse(localStorage.getItem('favoritos') || '[]');
+            setMostrarFavoritos(prev => {
+              const next = !prev;
+              if (next) {
+                Promise.allSettled(
+                  favs.map(id => fetch(`/api/restaurantes/${id}`).then(res => res.ok ? res.json() : null))
+                ).then(results => {
+                  const favoritos = results.filter(r => r.status === 'fulfilled' && r.value).map(r => r.value);
+                  setFavoritosVisiveis(favoritos);
+                });
+              }
+              return next;
+            });
+          }}
+          className={`px-6 py-2 rounded text-white font-semibold transition-all ${mostrarFavoritos ? 'bg-yellow-700' : 'bg-yellow-500 hover:bg-yellow-600'}`}
+        >
+          {`⭐ Meus Favoritos (${qtdFavoritos})`}
+        </button>
       </div>
 
       {loading && <p className="text-center mb-6">Carregando...</p>}
 
       <div ref={resultsRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {places.map(place => (
-          <div key={place.id} className="border rounded shadow p-4 cursor-pointer" 
-          onClick={async () => {
+        {(mostrarFavoritos ? favoritosVisiveis : places).map(place => (
+          <RestaurantCard
+            key={place.id || place.location_id}
+            isFavorite={JSON.parse(localStorage.getItem('favoritos') || '[]').includes(place.id || place.location_id)}
+            place={{ ...place, id: place.id || place.location_id }}
+            onSelect={async () => {
               try {
-                const res = await fetch(`/api/restaurantes/${place.location_id}`);
+                const res = await fetch(`/api/restaurantes/${place.location_id || place.id}`);
                 const data = await res.json();
-                setSelectedPlace(data);
+                setSelectedPlace({ ...place, ...data, id: place.id || place.location_id });
               } catch (error) {
                 console.error('Erro ao buscar detalhes do restaurante:', error);
               }
-            }}>
-            <img
-              src={place.imagem_url || '/placeholder.png'}
-              alt={place.nome}
-              className="w-full h-40 object-cover rounded mb-4 max-h-48 aspect-square transition-all duration-500 ease-in-out opacity-0 blur-sm border border-gray-300"
-              onLoad={(e) => {
-                e.target.classList.remove('opacity-0', 'blur-sm', 'border-gray-300');
-                e.target.classList.add('opacity-100');
-              }}
-              onError={(e) => {
-                e.target.src = '/placeholder.png';
-                e.target.className = 'w-full h-40 object-cover rounded mb-4 max-h-48 aspect-square opacity-100 blur-sm border border-gray-300';
-              }}
-            />
-            <h2 className="font-bold text-xl mb-2">{place.nome}</h2>
-            <p className="text-gray-600 mb-2">{place.categoria || 'Sem categoria'}</p>
-            <p className="text-yellow-500 mb-2">{place.nota ? `⭐ ${place.nota}` : 'Sem nota'}</p>
-            <p className="text-sm text-gray-500">{place.parent_geo_name}</p>
-          </div>
+            }}
+            onRequireLogin={handleRequireLogin}
+            onToggleFavorite={handleToggleFavorite}
+          />
         ))}
       </div>
 
-      {!loading && places.length === 0 && (
-        <p className="text-center text-gray-600 mt-6">Nenhum restaurante encontrado para esses filtros.</p>
+      {!loading && (mostrarFavoritos ? favoritosVisiveis.length === 0 : places.length === 0) && (
+        <p className="text-center text-gray-600 mt-6">{mostrarFavoritos ? 'Você ainda não tem restaurantes favoritos.' : 'Nenhum restaurante encontrado para esses filtros.'}</p>
       )}
 
       {selectedPlace && selectedPlace.detalhes_json && (
         <Modal place={selectedPlace} onClose={() => setSelectedPlace(null)} />
+      )}
+
+      {showCadastroModal && (
+        <CadastroModal onClose={() => setShowCadastroModal(false)} onSuccess={handleCadastroSucesso} />
       )}
     </div>
   );

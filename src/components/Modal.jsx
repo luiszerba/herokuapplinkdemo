@@ -13,9 +13,9 @@ export default function Modal({ place, onClose }) {
     return '/placeholder-small.jpg';
   })();
 
-  const name = detalhe?.overview?.name || place.nome || 'Restaurante';
-  const rating = detalhe?.overview?.rating || place.nota || null;
-  const address = detalhe?.location?.address?.address || 'Endereço não informado';
+  const name = place.nome || detalhe?.overview?.name || 'Restaurante';
+  const rating = place.nota || detalhe?.overview?.rating || null;
+  const address = detalhe?.location?.address?.address || place?.parent_geo_name || 'Endereço não informado';
   const neighborhood = detalhe?.location?.neighborhood?.text || '';
   const aboutItems = detalhe?.restaurantAbout?.content?.map(item => item?.collapsibleTextSubsection?.title || item?.collapsibleTextSubsectionText?.text)?.filter(Boolean) || [];
   const openHours = detalhe?.openHours?.hoursForDays || [];
@@ -63,7 +63,24 @@ export default function Modal({ place, onClose }) {
         />
 
         <div className="p-4 sm:p-6">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-1">{name}</h2>
+          <div className="flex items-center justify-between mb-1">
+  <h2 className="text-2xl sm:text-3xl font-bold">{name}</h2>
+  <button onClick={() => {
+    const favoritos = JSON.parse(localStorage.getItem('favoritos') || '[]');
+    let updated;
+    let isFav = false;
+    if (favoritos.includes(place.id)) {
+      updated = favoritos.filter(id => id !== place.id);
+    } else {
+      updated = [...favoritos, place.id];
+      isFav = true;
+    }
+    localStorage.setItem('favoritos', JSON.stringify(updated));
+    document.getElementById(`modal-heart-${place.id}`).innerText = isFav ? '❤️' : '🤍';
+  }} className="text-xl text-red-500 hover:scale-110 transition-transform">
+    <span id={`modal-heart-${place.id}`}>{JSON.parse(localStorage.getItem('favoritos') || '[]').includes(place.id) ? '❤️' : '🤍'}</span>
+  </button>
+</div>
           {rating && <p className="text-yellow-500 mb-1">⭐ {rating}</p>}
           <p className="text-gray-600 mb-4 text-sm sm:text-base">{address}{neighborhood && ` - ${neighborhood}`}</p>
 
