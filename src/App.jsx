@@ -3,6 +3,7 @@ import Modal from './components/Modal';
 import CadastroModal from './components/CadastroModal';
 import RestaurantCard from './components/RestaurantCard';
 
+
 export default function App() {
   const [paises, setPaises] = useState([]);
   const [regioes, setRegioes] = useState([]);

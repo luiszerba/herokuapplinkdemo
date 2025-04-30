@@ -3,6 +3,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import pg from 'pg';
 import dotenv from 'dotenv';
+import fetch from 'node-fetch'; 
+
 
 dotenv.config();
 
@@ -96,6 +98,37 @@ app.get('/api/restaurantes', async (req, res) => {
   } catch (err) {
     console.error('Erro na consulta:', err);
     res.status(500).json({ error: 'Erro ao consultar restaurantes' });
+  }
+});
+
+app.post('/RestFavorites', async (req, res) => {
+  const payload = req.body;
+  const fullUrl = process.env.HEROKUEVENTS_PUBLISH_URL;
+
+  if (!fullUrl) {
+    return res.status(500).json({ error: 'HEROKUEVENTS_PUBLISH_URL não definida' });
+  }
+
+  try {
+    const parsedUrl = new URL(`${fullUrl}/RestFavorites`);
+    const authHeader = 'Basic ' + Buffer.from(`${parsedUrl.username}:${parsedUrl.password}`).toString('base64');
+    parsedUrl.username = '';
+    parsedUrl.password = '';
+
+    const response = await fetch(parsedUrl.toString(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': authHeader
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await response.text();
+    res.status(response.status).send(text);
+  } catch (error) {
+    console.error('Erro ao enviar evento para Salesforce:', error);
+    res.status(500).json({ error: 'Falha ao enviar evento' });
   }
 });
 

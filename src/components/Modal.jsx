@@ -64,24 +64,48 @@ export default function Modal({ place, onClose }) {
 
         <div className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-1">
-  <h2 className="text-2xl sm:text-3xl font-bold">{name}</h2>
-  <button onClick={() => {
-    const favoritos = JSON.parse(localStorage.getItem('favoritos') || '[]');
-    let updated;
-    let isFav = false;
-    if (favoritos.includes(place.id)) {
-      updated = favoritos.filter(id => id !== place.id);
-    } else {
-      updated = [...favoritos, place.id];
-      isFav = true;
-    }
-    localStorage.setItem('favoritos', JSON.stringify(updated));
-    document.getElementById(`modal-heart-${place.id}`).innerText = isFav ? '❤️' : '🤍';
-  }} className="text-xl text-red-500 hover:scale-110 transition-transform">
-    <span id={`modal-heart-${place.id}`}>{JSON.parse(localStorage.getItem('favoritos') || '[]').includes(place.id) ? '❤️' : '🤍'}</span>
-    
-  </button>
-</div>
+            <h2 className="text-2xl sm:text-3xl font-bold">{name}</h2>
+            <button
+              onClick={async () => {
+                const favoritos = JSON.parse(localStorage.getItem('favoritos') || '[]');
+                const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+                const isFav = favoritos.includes(place.id);
+                let updated;
+
+                if (isFav) {
+                  updated = favoritos.filter(id => id !== place.id);
+                } else {
+                  updated = [...favoritos, place.id];
+                }
+
+                localStorage.setItem('favoritos', JSON.stringify(updated));
+                document.getElementById(`modal-heart-${place.id}`).innerText = isFav ? '🤍' : '❤️';
+
+                const payload = {
+                  CreatedDate: Date.now(),
+                  CreatedById: '005Hs00000Grqj2IAB',
+                  locationid__c: { string: place.id },
+                  restaurant_name__c: { string: name },
+                  useremail__c: { string: usuario.email },
+                  favoritado__c: { string: (!isFav).toString() },
+                  Name__c: { string: usuario.nome || 'Anônimo' }
+                };
+
+                try {
+                  await fetch('/RestFavorites', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                  });
+                } catch (err) {
+                  console.error('Erro ao enviar evento do modal:', err);
+                }
+              }}
+              className="text-xl text-red-500 hover:scale-110 transition-transform"
+            >
+              <span id={`modal-heart-${place.id}`}>{JSON.parse(localStorage.getItem('favoritos') || '[]').includes(place.id) ? '❤️' : '🤍'}</span>
+            </button>
+          </div>
           {rating && <p className="text-yellow-500 mb-1">⭐ {rating}</p>}
           <p className="text-gray-600 mb-4 text-sm sm:text-base">{address}{neighborhood && ` - ${neighborhood}`}</p>
 

@@ -36,9 +36,8 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
 
     localStorage.setItem('favoritos', JSON.stringify(favoritos));
 
-    // Enviar evento para o Event Bus do Salesforce
     try {
-      console.log(JSON.stringify({
+      const payload = {
         CreatedDate: Date.now(),
         CreatedById: '005Hs00000Grqj2IAB',
         locationid__c: { string: place.id },
@@ -46,20 +45,16 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
         useremail__c: { string: usuario.email },
         favoritado__c: { string: isAdding.toString() },
         Name__c: { string: usuario.nome || 'Anônimo' }
-      }));
-      await fetch(`${import.meta.env.HEROKUEVENTS_PUBLISH_URL}/RestFavorites`, {
+      };
+
+      const response = await fetch('/RestFavorites', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          CreatedDate: Date.now(),
-          CreatedById: '005Hs00000Grqj2IAB',
-          locationid__c: { string: place.id },
-          restaurant_name__c: { string: place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' },
-          useremail__c: { string: usuario.email },
-          favoritado__c: { string: isAdding.toString() },
-          Name__c: { string: usuario.nome || 'Anônimo' }
-        })
+        body: JSON.stringify(payload)
       });
+
+      const result = await response.text();
+      console.log('📤 Evento enviado. Resposta:', result);
     } catch (err) {
       console.error('Erro ao enviar evento:', err);
     }
