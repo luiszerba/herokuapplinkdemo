@@ -1,0 +1,126 @@
+openapi: 3.0.3
+info:
+  title: Travel Restaurants API
+  description: API para consulta de restaurantes, países, regiões e categorias.
+  version: 1.0.0
+servers:
+  - url: https://travel-app-experience-b7e9d856670c.herokuapp.com/api
+
+paths:
+  /paises:
+    get:
+      summary: Lista de países disponíveis
+      responses:
+        '200':
+          description: Lista de países
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          description: Erro ao consultar países
+
+  /regioes:
+    get:
+      summary: Lista de regiões por país
+      parameters:
+        - name: pais
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de regiões
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          description: Erro ao consultar regiões
+
+  /categorias:
+    get:
+      summary: Lista de categorias por região
+      parameters:
+        - name: regiao
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de categorias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          description: Erro ao consultar categorias
+
+  /restaurantes:
+    get:
+      summary: Lista de restaurantes com filtros
+      parameters:
+        - name: pais
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: regiao
+          in: query
+          schema:
+            type: string
+        - name: categoria
+          in: query
+          schema:
+            type: string
+        - name: notaMinima
+          in: query
+          schema:
+            type: number
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de restaurantes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '500':
+          description: Erro ao consultar restaurantes
+
+  /restaurantes/{locationId}:
+    get:
+      summary: Detalhes do restaurante por ID
+      parameters:
+        - name: locationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalhes do restaurante
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detalhes_json:
+                    type: object
+        '404':
+          description: Restaurante não encontrado
+        '500':
+          description: Erro ao buscar detalhes do restaurante
