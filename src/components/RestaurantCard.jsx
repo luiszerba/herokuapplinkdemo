@@ -38,7 +38,16 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
 
     // Enviar evento para o Event Bus do Salesforce
     try {
-      await fetch(`${import.meta.env.VITE_HEROKUEVENTS_PUBLISH_URL}/RestFavorites`, {
+      console.log(JSON.stringify({
+        CreatedDate: Date.now(),
+        CreatedById: '005Hs00000Grqj2IAB',
+        locationid__c: { string: place.id },
+        restaurant_name__c: { string: place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' },
+        useremail__c: { string: usuario.email },
+        favoritado__c: { string: isAdding.toString() },
+        Name__c: { string: usuario.nome || 'Anônimo' }
+      });)
+      await fetch(`${import.meta.env.HEROKUEVENTS_PUBLISH_URL}/RestFavorites`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
