@@ -47,7 +47,8 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
           locationid__c: { string: place.id },
           restaurant_name__c: { string: place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' },
           useremail__c: { string: usuario.email },
-          favoritado__c: { string: isAdding.toString() }
+          favoritado__c: { string: isAdding.toString() },
+          Name__c: { string: usuario.nome || 'Anônimo' }
         })
       });
     } catch (err) {
