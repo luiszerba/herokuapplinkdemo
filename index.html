@@ -34,6 +34,7 @@
       }
     </script>
     <script>
+      
       window.addEventListener("onEmbeddedMessagingReady", () => {
         console.log("🟢 Embedded Messaging pronto!");
       
@@ -44,7 +45,7 @@
           if (email) {
             embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({ customeremail: email });
             console.log("📨 Email enviado ao prechatAPI:", email);
-            clearInterval(interval);
+            
           } else {
             console.log("⏳ Aguardando usuário...");
           }
