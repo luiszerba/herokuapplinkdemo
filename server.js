@@ -195,7 +195,7 @@ app.get('/api/restaurantesPatchedHeroku/:locationId', async (req, res) => {
       categoria: row.categoria,
       location_id: row.location_id,
       parent_geo_name: row.avaliacao_json?.parentGeoName || null,
-      detalhesJson: row.detalhes_json
+      detalhesJson: JSON.parse(row.detalhes_json)
     });
   } catch (err) {
     console.error('Erro ao buscar detalhes do restaurante:', err);
