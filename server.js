@@ -170,6 +170,39 @@ app.get('/api/restaurantes/:locationId', async (req, res) => {
   }
 });
 
+app.get('/api/restaurantesPatchedHeroku/:locationId', async (req, res) => {
+  const { locationId } = req.params;
+
+  try {
+    const result = await client.query(
+      `SELECT nome, nota, categoria, location_id, avaliacao_json, detalhes_json
+       FROM restaurantes
+       WHERE location_id = $1
+       LIMIT 1`,
+      [locationId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Restaurante não encontrado' });
+    }
+
+    const row = result.rows[0];
+
+    res.json({
+      id: row.id,
+      nome: row.nome,
+      nota: row.nota,
+      categoria: row.categoria,
+      location_id: row.location_id,
+      parent_geo_name: row.avaliacao_json?.parentGeoName || null,
+      detalhesJson: row.detalhes_json
+    });
+  } catch (err) {
+    console.error('Erro ao buscar detalhes do restaurante:', err);
+    res.status(500).json({ error: 'Erro ao buscar detalhes do restaurante' });
+  }
+});
+
 
 // Servir frontend
 app.use(express.static(path.join(__dirname, 'dist')));
