@@ -1,13 +1,102 @@
 
 openapi: 3.0.0
 info:
-  title: HerokuAPI Patched Stringified
-  version: 1.0.2
-  description: Versão com detalhesJson como string
+  title: HerokuAPI
+  version: 1.0.0
+  description: External Service for Heroku Travel App
 servers:
   - url: https://travel-app-experience-b7e9d856670c.herokuapp.com
-
 paths:
+  /api/paises:
+    get:
+      operationId: getPaises
+      summary: Lista de países disponíveis
+      responses:
+        '200':
+          description: Lista de países
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /api/regioes:
+    get:
+      operationId: getRegioes
+      summary: Lista de regiões por país
+      parameters:
+        - name: pais
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de regiões
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /api/categorias:
+    get:
+      operationId: getCategorias
+      summary: Lista de categorias por região
+      parameters:
+        - name: regiao
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de categorias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /api/restaurantes:
+    get:
+      operationId: getRestaurantes
+      summary: Lista de restaurantes com filtros
+      parameters:
+        - name: pais
+          in: query
+          schema:
+            type: string
+        - name: regiao
+          in: query
+          schema:
+            type: string
+        - name: categoria
+          in: query
+          schema:
+            type: string
+        - name: notaMinima
+          in: query
+          schema:
+            type: number
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de restaurantes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestauranteResumo'
+
+  paths:
   /api/restaurantesPatchedHeroku/{locationId}:
     get:
       operationId: getRestaurantesByLocationIdPatchedString
