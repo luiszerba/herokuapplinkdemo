@@ -38,6 +38,18 @@ export default function App() {
   }, [selectedPais]);
 
   useEffect(() => {
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+  
+    if (usuario?.email) {
+      console.log('🔄 Usuário existente detectado:', usuario);
+  
+      // Dispara o mesmo evento usado no cadastro
+      window.dispatchEvent(new CustomEvent('usuarioCadastrado', { detail: usuario }));
+    }
+  }, []);
+  
+
+  useEffect(() => {
     if (selectedPais || selectedRegiao) {
       const url = new URL('/api/categorias', window.location.origin);
       if (selectedPais) url.searchParams.append('pais', selectedPais);
