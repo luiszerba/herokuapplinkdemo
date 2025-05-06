@@ -35,7 +35,7 @@
     </script>
     <script>
       
-      window.addEventListener("onEmbeddedMessagingReady", () => {
+      /*window.addEventListener("onEmbeddedMessagingReady", () => {
         console.log("🟢 Embedded Messaging pronto!");
       
         const interval = setInterval(() => {
@@ -50,9 +50,20 @@
             console.log("⏳ Aguardando usuário...");
           }
         }, 500); // verifica a cada 500ms até encontrar
-      });
+      });*/
       
     </script>
+
+    <script>
+      window.addEventListener("usuarioCadastrado", (e) => {
+        const email = e.detail?.email;
+        if (email && window.embeddedservice_bootstrap?.prechatAPI) {
+          embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({ customeremail: email });
+          console.log("📨 Email enviado via index.html:", email);
+        }
+      });
+    </script>
+
     <script
       type="text/javascript"
       src="https://storm-04dd1cb768ee3e.my.site.com/ESWSDOMessagingforWeb1734615879047/assets/js/bootstrap.min.js"

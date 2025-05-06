@@ -10,6 +10,9 @@ export default function CadastroModal({ onClose, onSuccess }) {
     e.preventDefault();
     const usuario = { nome, cpf, telefone, email };
     localStorage.setItem('usuario', JSON.stringify(usuario));
+
+    window.dispatchEvent(new CustomEvent('usuarioCadastrado', { detail: usuario }));
+
     onSuccess(usuario);
     onClose();
   };
