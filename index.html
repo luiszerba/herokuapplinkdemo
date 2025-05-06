@@ -35,22 +35,21 @@
     </script>
     <script>
       
-      /*window.addEventListener("onEmbeddedMessagingReady", () => {
+      window.addEventListener("onEmbeddedMessagingReady", () => {
         console.log("🟢 Embedded Messaging pronto!");
       
-        const interval = setInterval(() => {
-          const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-          const email = usuario?.email;
-      
-          if (email) {
-            embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({ customeremail: email });
-            console.log("📨 Email enviado ao prechatAPI:", email);
-            clearInterval(interval);
-          } else {
-            console.log("⏳ Aguardando usuário...");
-          }
-        }, 500); // verifica a cada 500ms até encontrar
-      });*/
+        
+        const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+        const email = usuario?.email;
+    
+        if (email) {
+          embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({ customeremail: email });
+          console.log("📨 Email enviado ao prechatAPI:", email);
+          clearInterval(interval);
+        } else {
+          console.log("⏳ Aguardando usuário...");
+        }
+      });
       
     </script>
 
