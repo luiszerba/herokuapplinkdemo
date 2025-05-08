@@ -63,14 +63,14 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
 
       SalesforceInteractions.sendEvent({
         interaction: {
-          name: "RestaurantInteraction",
-          eventType: "RestaurantInteraction",
-          category: "Engagement",
-          restaurantInteraction_customeremail__c: usuario.email ,
-          restaurantInteraction_cpf__c: usuario.cpf ,
-          restaurantInteraction_favoritado__c: isAdding.toString() ,
-          restaurantInteraction_locationId__c: place.id ,
-          restaurantInteraction_restaurantName__c: place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' 
+          "name": "RestaurantInteraction",
+          "eventType": "RestaurantInteraction",
+          "category": "Engagement",
+          "restaurantInteraction.customeremail__c": usuario.email ,
+          "restaurantInteraction.cpf__c": usuario.cpf ,
+          "restaurantInteraction.favoritado__c": isAdding.toString() ,
+          "restaurantInteraction.locationid__c": place.id ,
+          "restaurantInteraction.restaurantName__c": place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' 
         }
       });
 
