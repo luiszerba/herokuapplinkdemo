@@ -63,6 +63,20 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
 
       SalesforceInteractions.sendEvent({
         interaction: {
+          name: 'restI9n',
+          eventType: 'restI9n',
+          attributes: {
+              custname: usuario.nome || 'Anônimo' ,
+              custremail: usuario.email ,
+              cpf: usuario.cpf ,
+              favorite: isAdding.toString() ,
+              locationId: place.id ,
+              restName: place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' 
+            }
+      }})
+
+      /*SalesforceInteractions.sendEvent({
+        interaction: {
           "name": "RestaurantInteraction",
           "eventType": "RestaurantInteraction",
           "category": "Engagement",
@@ -72,7 +86,7 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
           "locationid": place.id ,
           "restaurantName": place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' 
         }
-      });
+      });*/
 
 
       const url = new URL('/api/RestFavorites', window.location.origin);

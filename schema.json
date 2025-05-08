@@ -1,8 +1,8 @@
 {
     "records": [
       {
-        "developerName": "restaurantInteraction",
-        "masterLabel": "RestaurantInteraction",
+        "developerName": "restI9n",
+        "masterLabel": "restI9n",
         "category": "Engagement",
         "externalDataTranFields": [
           {
@@ -46,39 +46,39 @@
             "isDataRequired": true
           },
           {
-            "masterLabel": "customername",
+            "masterLabel": "custname",
             "dataType": "Text",
-            "developerName": "customername",
+            "developerName": "attributescustname",
             "isDataRequired": true
           },
           {
             "masterLabel": "cpf",
             "dataType": "Text",
-            "developerName": "cpf",
+            "developerName": "attributescpf",
             "isDataRequired": true
           },
           {
             "masterLabel": "customeremail",
             "dataType": "Text",
-            "developerName": "customeremail",
+            "developerName": "attributescustremail",
             "isDataRequired": true
           },
           {
             "masterLabel": "favoritado",
             "dataType": "Text",
-            "developerName": "favoritado",
+            "developerName": "attributesfavorite",
             "isDataRequired": true
           },
           {
             "masterLabel": "locationId",
             "dataType": "Number",
-            "developerName": "locationId",
+            "developerName": "attributeslocationId",
             "isDataRequired": true
           },
           {
             "masterLabel": "restaurantName",
             "dataType": "Text",
-            "developerName": "restaurantName",
+            "developerName": "attributesrestName",
             "isDataRequired": true
           }
         ]
