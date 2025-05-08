@@ -13,7 +13,7 @@
 
     <script>
       //Initialize the SDK
-      /*SalesforceInteractions.init({
+      SalesforceInteractions.init({
         consents: [
             { 
                 purpose: SalesforceInteractions.ConsentPurpose.Tracking, 
@@ -21,7 +21,17 @@
                 status: SalesforceInteractions.ConsentStatus.OptIn 
             }
         ]
-    }); */
+    }); 
+
+    SalesforceInteractions.updateConsents({
+      consents: [
+          { 
+              purpose: SalesforceInteractions.ConsentPurpose.Tracking, 
+              provider: "OneTrust", 
+              status: SalesforceInteractions.ConsentStatus.OptIn 
+          }
+      ]
+  }); 
 
     SalesforceInteractions.updateConsents({
       purpose: SalesforceInteractions.ConsentPurpose.Tracking,
