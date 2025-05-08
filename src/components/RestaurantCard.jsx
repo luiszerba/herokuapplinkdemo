@@ -66,7 +66,6 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
           name: "RestaurantInteraction",
           //eventType: "restaurantInteraction",
           //category: "restaurants",
-          restaurantInteraction_restaurantName__c: { string: usuario.nome || 'Anônimo' },
           restaurantInteraction_customeremail__c: { string: usuario.email },
           restaurantInteraction_cpf__c: { string: usuario.cpf },
           restaurantInteraction_favoritado__c: { string: isAdding.toString() },
