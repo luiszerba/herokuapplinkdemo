@@ -47,7 +47,7 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
         Name__c: { string: usuario.nome || 'Anônimo' }
       };
 
-      SalesforceInteractions.sendEvent({
+      /*SalesforceInteractions.sendEvent({
         interaction: {
           name: "RestaurantInteraction",
           //eventType: "restaurantInteraction",
@@ -58,6 +58,20 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
           favoritado: { string: isAdding.toString() },
           locationId: { string: place.id },
           restaurantName: { string: place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' }
+        }
+      });*/
+
+      SalesforceInteractions.sendEvent({
+        interaction: {
+          name: "RestaurantInteraction",
+          //eventType: "restaurantInteraction",
+          //category: "restaurants",
+          restaurantInteraction_restaurantName__c: { string: usuario.nome || 'Anônimo' },
+          restaurantInteraction_customeremail__c: { string: usuario.email },
+          restaurantInteraction_cpf__c: { string: usuario.cpf },
+          restaurantInteraction_favoritado__c: { string: isAdding.toString() },
+          restaurantInteraction_locationId__c: { string: place.id },
+          restaurantInteraction_restaurantName__c: { string: place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' }
         }
       });
 
