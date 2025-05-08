@@ -9,6 +9,23 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script src="https://cdn.c360a.salesforce.com/beacon/c360a/eb9c5bfe-2518-49bc-83d0-9425619c69d7/scripts/c360a.min.js"></script>
+
+    <script>
+      //Initialize the SDK
+      SalesforceInteractions.init({
+        consents: [
+            { 
+                purpose: SalesforceInteractions.ConsentPurpose.Tracking, 
+                provider: "OneTrust", 
+                status: SalesforceInteractions.ConsentStatus.OptIn 
+            }
+        ]
+    });
+      
+      // Set the logging level for debugging purposes
+      SalesforceInteractions.setLoggingLevel(4); 
+  </script>
 
     <!-- Salesforce Embedded Messaging -->
     <script type="text/javascript">

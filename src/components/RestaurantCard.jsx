@@ -47,6 +47,20 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
         Name__c: { string: usuario.nome || 'Anônimo' }
       };
 
+      SalesforceInteractions.sendEvent({
+        interaction: {
+          name: "restaurantInteraction",
+          eventType: "favoriteRestaurant",
+          category: "restaurants",
+          customername: { string: usuario.nome || 'Anônimo' },
+          customeremail: { string: usuario.email },
+          favoritado: { string: isAdding.toString() },
+          locationId: { string: place.id },
+          restaurantName: { string: place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' }
+        }
+      });
+
+
       const url = new URL('/api/RestFavorites', window.location.origin);
 
       const response = await fetch(url, {
