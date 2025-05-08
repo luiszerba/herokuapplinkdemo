@@ -50,7 +50,7 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
       SalesforceInteractions.sendEvent({
         interaction: {
           name: "restaurantInteraction",
-          eventType: "favoriteRestaurant",
+          eventType: "restaurantInteraction",
           category: "restaurants",
           customername: { string: usuario.nome || 'Anônimo' },
           customeremail: { string: usuario.email },
