@@ -66,11 +66,11 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
           "name": "RestaurantInteraction",
           "eventType": "RestaurantInteraction",
           "category": "Engagement",
-          "restaurantInteraction.customeremail__c": usuario.email ,
-          "restaurantInteraction.cpf__c": usuario.cpf ,
-          "restaurantInteraction.favoritado__c": isAdding.toString() ,
-          "restaurantInteraction.locationid__c": place.id ,
-          "restaurantInteraction.restaurantName__c": place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' 
+          "restaurantInteraction.customeremail": usuario.email ,
+          "restaurantInteraction.cpf": usuario.cpf ,
+          "restaurantInteraction.favoritado": isAdding.toString() ,
+          "restaurantInteraction.locationid": place.id ,
+          "restaurantInteraction.restaurantName": place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' 
         }
       });
 
