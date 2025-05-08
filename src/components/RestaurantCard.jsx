@@ -54,6 +54,7 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
           category: "restaurants",
           customername: { string: usuario.nome || 'Anônimo' },
           customeremail: { string: usuario.email },
+          cpf: { string: usuario.cpf },
           favoritado: { string: isAdding.toString() },
           locationId: { string: place.id },
           restaurantName: { string: place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' }
