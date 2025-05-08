@@ -49,9 +49,9 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
 
       SalesforceInteractions.sendEvent({
         interaction: {
-          name: "restaurantInteraction",
+          name: "RestaurantInteraction",
           eventType: "restaurantInteraction",
-          category: "restaurants",
+          //category: "restaurants",
           customername: { string: usuario.nome || 'Anônimo' },
           customeremail: { string: usuario.email },
           cpf: { string: usuario.cpf },
