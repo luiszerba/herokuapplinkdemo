@@ -61,29 +61,16 @@ export default function RestaurantCard({ place, onSelect, onRequireLogin, isFavo
         }
       });*/
 
-      /*SalesforceInteractions.sendEvent({
+      SalesforceInteractions.sendEvent({
         interaction: {
           name: "RestaurantInteraction",
-          //eventType: "restaurantInteraction",
-          //category: "restaurants",
+          eventType: "RestaurantInteraction",
+          category: "Engagement",
           restaurantInteraction_customeremail__c: usuario.email ,
           restaurantInteraction_cpf__c: usuario.cpf ,
           restaurantInteraction_favoritado__c: isAdding.toString() ,
           restaurantInteraction_locationId__c: place.id ,
           restaurantInteraction_restaurantName__c: place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' 
-        }
-      });*/
-
-      SalesforceInteractions.sendEvent({
-        interaction: {
-          name: "RestaurantInteraction",
-          //eventType: "restaurantInteraction",
-          //category: "restaurants",
-          customeremail__c: usuario.email ,
-          cpf__c: usuario.cpf ,
-          favoritado__c: isAdding.toString() ,
-          locationId__c: place.id ,
-          restaurantName__c: place.nome || place?.detalhes_json?.overview?.name || 'Desconhecido' 
         }
       });
 
